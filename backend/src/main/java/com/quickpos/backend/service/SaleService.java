@@ -6,6 +6,7 @@ import com.quickpos.backend.repository.SaleRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SaleService {
@@ -18,11 +19,8 @@ public class SaleService {
 
     public Sale saveSale(Sale sale) {
 
+        sale.setInvoiceNo("INV-" + System.currentTimeMillis());
         sale.setSaleDate(LocalDateTime.now());
-
-        sale.setInvoiceNo(
-                "INV-" + System.currentTimeMillis()
-        );
 
         for (SaleItem item : sale.getItems()) {
             item.setSale(sale);
@@ -30,6 +28,10 @@ public class SaleService {
 
         return saleRepository.save(sale);
 
+    }
+
+    public List<Sale> getAllSales() {
+        return saleRepository.findAll();
     }
 
 }

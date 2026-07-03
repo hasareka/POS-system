@@ -2,6 +2,7 @@ import { useState } from "react";
 import ProductList from "../components/ProductList";
 import Cart from "../components/Cart";
 import Receipt from "../components/Receipt";
+import api from "../api/api";
 
 function POS() {
 
@@ -75,26 +76,55 @@ function POS() {
 
     };
 
-    const checkout = () => {
+const checkout = async () => {
 
-        const total = cart.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-        );
+    const total = cart.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    );
 
-        if (cart.length === 0) {
-            alert("No items in the bill.");
-            return;
-        }
+    if (cart.length === 0) {
+        alert("No items in the bill.");
+        return;
+    }
 
-        if (Number(cashReceived) < total) {
-            alert("Insufficient cash received.");
-            return;
-        }
+    if (Number(cashReceived) < total) {
+        alert("Insufficient cash received.");
+        return;
+    }
+
+    try {
+
+        const sale = {
+
+            total: total,
+
+            cashReceived: Number(cashReceived),
+
+            balance: Number(cashReceived) - total,
+
+            items: cart.map(item => ({
+                productName: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                subtotal: item.price * item.quantity
+            }))
+
+        };
+
+        await api.post("/sales", sale);
 
         setShowReceipt(true);
 
-    };
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Failed to save sale.");
+
+    }
+
+};
 
     const closeReceipt = () => {
         setShowReceipt(false);
